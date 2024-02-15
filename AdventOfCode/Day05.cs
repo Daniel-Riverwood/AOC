@@ -55,7 +55,7 @@ public class Day05 : BaseDay
 
                 sectionName = splitLine[0];
             }
-            else if (!string.IsNullOrEmpty(line))
+            else if (!string.IsNullOrEmpty(line) && !string.Equals("\r", line))
             {
 
                 var section = line.Split(' ');
@@ -117,7 +117,7 @@ public class Day05 : BaseDay
 
         var locations = new ConcurrentBag<long>();
 
-        Parallel.ForEach(collection.SeedCollection, new ParallelOptions() { MaxDegreeOfParallelism = 16 }, q =>
+        Parallel.ForEach(collection.SeedCollection, new ParallelOptions() { MaxDegreeOfParallelism = 1000 }, q =>
         {
             var minLocation = long.MaxValue;
             var locs = new List<long> { q.Seed };
