@@ -140,30 +140,29 @@ public class Day05 : BaseDay
 
     private long ProcessInput2()
     {
-        var collection = GenerateCollections(_input, true);
+        var collection = GenerateCollections (_input, true);
 
         var locations = new ConcurrentBag<long>();
 
-        //Parallel.ForEach(collection.SeedRangeCollection, new ParallelOptions() { MaxDegreeOfParallelism = 1000 }, (q, i, x) =>
-        //{
-        //    var minLocation = long.MaxValue;
-        //    for (long y = q.Seed; y < q.SeedEnd; y++)
-        //    {
-        //        var locations = new List<long>() { y };
+        Parallel.ForEach(collection.SeedRangeCollection, new ParallelOptions() { MaxDegreeOfParallelism = 1000 }, (q, i, x) =>
+        {
+            var minLocation = long.MaxValue;
+            for (long y = q.Seed; y < q.SeedEnd; y++)
+            {
+                var locations = new List<long>() { y };
 
-        //        MapSrcToDest(collection.SeedToSoil, locations);
-        //        MapSrcToDest(collection.SoilToFertilizer, locations);
-        //        MapSrcToDest(collection.FertilizerToWater, locations);
-        //        MapSrcToDest(collection.WaterToLight, locations);
-        //        MapSrcToDest(collection.LightToTemperature, locations);
-        //        MapSrcToDest(collection.TemperatureToHumidity, locations);
-        //        MapSrcToDest(collection.HumidityToLocation, locations);
+                MapSrcToDest(collection.SeedToSoil, locations);
+                MapSrcToDest(collection.SoilToFertilizer, locations);
+                MapSrcToDest(collection.FertilizerToWater, locations);
+                MapSrcToDest(collection.WaterToLight, locations);
+                MapSrcToDest(collection.LightToTemperature, locations);
+                MapSrcToDest(collection.TemperatureToHumidity, locations);
+                MapSrcToDest(collection.HumidityToLocation, locations);
 
-        //        minLocation = Math.Min(locations.Last(), minLocation);
-        //    }
-        //    locations.Add(minLocation);
-        //});
-
+                minLocation = Math.Min(locations.Last(), minLocation);
+            }
+            locations.Add(minLocation);
+        });
 
         return locations.Min();
     }
