@@ -99,7 +99,7 @@ public class Day05 : BaseDay
    private void MapSrcToDest (List<Map> Maps, List<long> location)
     {
         var last = location.Last();
-        var matching = Maps.Where(q => q.SourceStart <= last && q.SourceEnd >= last).FirstOrDefault();
+        var matching = Maps.Find(q => q.SourceStart <= last && q.SourceEnd >= last);
         if (matching != null)
         {
             long diff = last - matching.SourceStart;
@@ -144,25 +144,25 @@ public class Day05 : BaseDay
 
         var locations = new ConcurrentBag<long>();
 
-        Parallel.ForEach(collection.SeedRangeCollection, new ParallelOptions() { MaxDegreeOfParallelism = 16 }, (q, i, x) =>
-        {
-            var minLocation = long.MaxValue;
-            for (long y = q.Seed; y < q.SeedEnd; y++)
-            {
-                var locations = new List<long>() { y };
+        //Parallel.ForEach(collection.SeedRangeCollection, new ParallelOptions() { MaxDegreeOfParallelism = 1000 }, (q, i, x) =>
+        //{
+        //    var minLocation = long.MaxValue;
+        //    for (long y = q.Seed; y < q.SeedEnd; y++)
+        //    {
+        //        var locations = new List<long>() { y };
 
-                MapSrcToDest(collection.SeedToSoil, locations);
-                MapSrcToDest(collection.SoilToFertilizer, locations);
-                MapSrcToDest(collection.FertilizerToWater, locations);
-                MapSrcToDest(collection.WaterToLight, locations);
-                MapSrcToDest(collection.LightToTemperature, locations);
-                MapSrcToDest(collection.TemperatureToHumidity, locations);
-                MapSrcToDest(collection.HumidityToLocation, locations);
+        //        MapSrcToDest(collection.SeedToSoil, locations);
+        //        MapSrcToDest(collection.SoilToFertilizer, locations);
+        //        MapSrcToDest(collection.FertilizerToWater, locations);
+        //        MapSrcToDest(collection.WaterToLight, locations);
+        //        MapSrcToDest(collection.LightToTemperature, locations);
+        //        MapSrcToDest(collection.TemperatureToHumidity, locations);
+        //        MapSrcToDest(collection.HumidityToLocation, locations);
 
-                minLocation = Math.Min(locations.Last(), minLocation);
-            }
-            locations.Add(minLocation);
-        });
+        //        minLocation = Math.Min(locations.Last(), minLocation);
+        //    }
+        //    locations.Add(minLocation);
+        //});
 
 
         return locations.Min();

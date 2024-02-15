@@ -1,30 +1,86 @@
-﻿namespace AdventOfCode;
+﻿using System.Collections.Concurrent;
+
+namespace AdventOfCode;
 
 public class Day06 : BaseDay
 {
-    private readonly string _input;
-    private readonly Dictionary<string, string> numbers = new Dictionary<string, string>() 
-    { { "zero", "ze0o" }, { "one", "o1e" }, { "two", "t2o" }, { "three", "th3ee" }, { "four", "fo4r" }, { "five", "fi5e" }, { "six", "s6x" }, { "seven", "se7en" }, { "eight", "ei8ht" }, { "nine", "ni9e" } };
-    
+    private readonly List<string> _input;
     public Day06()
     {
-        _input = File.ReadAllText(InputFilePath);
+        _input = File.ReadAllText(InputFilePath).Split("\n").ToList();
     }
-
-    private string ProcessInput1 (string line)
+    private Collection4 GenerateCollections(List<string> lines, bool step2 = false)
     {
-        var convertedList = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{convertedList.First()}{convertedList.Last()}";
+        var timeLine = lines[0].Split(':')[1];
+        var distLine = lines[1].Split(':')[1];
+        var times = timeLine.Trim().Split(' ').Where(q => !string.IsNullOrWhiteSpace(q)).ToList();
+        var distances = distLine.Trim().Split(' ').Where(q => !string.IsNullOrWhiteSpace(q)).ToList();
+
+        var races = new List<Map2>();
+
+        for (int i = 0; i < times.Count(); i++)
+        {
+            var map = new Map2(int.Parse(times[i]), int.Parse(distances[i]));
+
+            races.Add(map);
+        }
+
+
+        return new Collection4(races);
     }
 
-    private string ProcessInput2 (string line)
+    private long ProcessInput1 ()
     {
-        foreach (var number in numbers) line = line.Replace(number.Key, number.Value);
-        var converted = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{converted.First()}{converted.Last()}";
+        var collection = GenerateCollections(_input);
+        var result = new ConcurrentBag<long>();
+
+        Parallel.ForEach(collection.Races, (race, i, thread) =>
+        {
+            var wins = 0;
+            for (int x = 0; x < race.Time; x++)
+            {
+                var dist = x * (race.Time - x);
+                if (dist > race.Distance)
+                {
+                    wins++;
+                }
+            }
+
+            result.Add(wins);
+        });
+
+        return result.Aggregate((x, y) => x * y);
     }
 
-    public override ValueTask<string> Solve_1() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput1(x)).Sum(q => int.Parse(q))}, part 1");
+    private long ProcessInput2 ()
+    {
+        var collection = GenerateCollections(_input);
+        var map = new Map2(Convert.ToInt64(string.Join("", collection.Races.Select(q => q.Time.ToString()))), Convert.ToInt64(string.Join("", collection.Races.Select(q => q.Distance.ToString()))));
 
-    public override ValueTask<string> Solve_2() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput2(x)).Sum(q => int.Parse(q))}, part 2");
+        var wins = 0;
+        for (int x = 0; x < map.Time; x++)
+        {
+            var dist = x * (map.Time - x);
+            if (dist > map.Distance)
+            {
+                wins++;
+            }
+        }
+
+        return wins;
+    }
+
+    public override ValueTask<string> Solve_1() => new($"{ProcessInput1()}, part 1");
+
+    public override ValueTask<string> Solve_2() => new($"{ProcessInput2()}, part 2");
+}
+public class Collection4(List<Map2> races)
+{
+    public List<Map2> Races { get; set; } = races;
+}
+
+public class Map2(long time, long distance)
+{
+    public long Time { get; set; } = time;
+    public long Distance { get; set; } = distance;
 }
