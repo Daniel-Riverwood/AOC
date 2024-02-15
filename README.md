@@ -67,4 +67,4 @@ Day       Time   Rank  Score       Time   Rank  Score
   2   00:19:53   4372      0   00:27:06   4544      0
   1   00:35:32  10745      0   01:07:42   7517      0
 ```
-- May spend some time creating a separate branch to create more optimal solutions, however the main branch will only contain the approaches as they were used on the days.
+- May spend some time creating a separate branch to create more optimal solutions, however the main branch will only contain the approaches as they were made on each of the advent days.
