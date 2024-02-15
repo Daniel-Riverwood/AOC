@@ -1,30 +1,112 @@
-﻿namespace AdventOfCode;
+﻿using static AdventOfCode.Utilities;
+
+namespace AdventOfCode;
 
 public class Day23 : BaseDay
 {
-    private readonly string _input;
-    private readonly Dictionary<string, string> numbers = new Dictionary<string, string>() 
-    { { "zero", "ze0o" }, { "one", "o1e" }, { "two", "t2o" }, { "three", "th3ee" }, { "four", "fo4r" }, { "five", "fi5e" }, { "six", "s6x" }, { "seven", "se7en" }, { "eight", "ei8ht" }, { "nine", "ni9e" } };
-    
+    private readonly List<string> _input;
+    private List<List<Path>> PathList = new List<List<Path>>();
+    private Coordinate2D Start = new Coordinate2D(0, 0);
+    private Coordinate2D End = new Coordinate2D(0, 0);
+    private int Longest = 0;
+    private bool P2 = false;
     public Day23()
     {
-        _input = File.ReadAllText(InputFilePath);
+        _input = File.ReadAllText(InputFilePath).SplitByDoubleNewline();
     }
 
-    private string ProcessInput1 (string line)
+    private long isValid(int x, int y, CompassDirection dir)
     {
-        var convertedList = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{convertedList.First()}{convertedList.Last()}";
+        if (PathList[x][y].visited == 1) return 0;
+
+        if (P2)
+        {
+            if (PathList[x][y].path == '#') return 0;
+            return 1;
+        }
+        else
+        {
+            return PathList[x][y].path switch
+            {
+                '>' => dir == CompassDirection.E ? 1 : 0,
+                '<' => dir == CompassDirection.W ? 1 : 0,
+                '^' => dir == CompassDirection.N ? 1 : 0,
+                'v' => dir == CompassDirection.S ? 1 : 0,
+                '.' => 1,
+                _ => -1
+            };
+        }
     }
 
-    private string ProcessInput2 (string line)
+    private void LongestPath(int x, int y, CompassDirection dir, int visited)
     {
-        foreach (var number in numbers) line = line.Replace(number.Key, number.Value);
-        var converted = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{converted.First()}{converted.Last()}";
+        PathList[x][y].visited = 1;
+
+        if (x == End.x && y == End.y)
+        {
+            if (visited > Longest)
+            {
+                Longest = visited;
+            }
+            PathList[x][y].visited = 0;
+            return;
+        }
+
+        if (isValid(x - 1, y, CompassDirection.N) == 1) LongestPath(x - 1, y, CompassDirection.N, visited + 1);
+
+        if (isValid(x + 1, y, CompassDirection.S) == 1) LongestPath(x + 1, y, CompassDirection.S, visited + 1);
+
+        if (isValid(x, y + 1, CompassDirection.E) == 1) LongestPath(x, y + 1, CompassDirection.E, visited + 1);
+
+        if (isValid(x, y - 1, CompassDirection.W) == 1) LongestPath(x, y - 1, CompassDirection.W, visited + 1);
+
+        PathList[x][y].visited = 0;
     }
 
-    public override ValueTask<string> Solve_1() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput1(x)).Sum(q => int.Parse(q))}, part 1");
+    private long Actions(string area)
+    {
+        var map = area.SplitByNewline().ToList();
+        var gridSize = map.Count;
 
-    public override ValueTask<string> Solve_2() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput2(x)).Sum(q => int.Parse(q))}, part 2");
+        Start = Enumerable.Range(0, map[0].Count()).Where(j => map[0][j] == '.')
+                .Select(j => new Coordinate2D(0, j)).Single();
+
+        End = Enumerable.Range(0, gridSize).Where(j => map[gridSize - 1][j] == '.')
+                .Select(j => new Coordinate2D(gridSize - 1, j)).Single();
+
+        PathList = map.Select(q => q.ToArray()).ToArray().Select(q => q.Select(e => new Path() { path = e, visited = e == '#' ? 1 : 0 }).ToList()).ToList();
+
+        PathList[Start.x][Start.y].visited = 1;
+
+        LongestPath(Start.x + 1, Start.y, CompassDirection.S, 1);
+
+        return Longest;
+    }
+
+    private long ProcessInput1() => Actions(_input.First());
+
+    private long ProcessInput2()
+    {
+        P2 = true;
+        return Actions(_input.First());
+    }
+    public override ValueTask<string> Solve_1() => new($"{ProcessInput1()}");
+
+    public override ValueTask<string> Solve_2() => new($"{ProcessInput2()}");
+}
+public class Path
+{
+    public char path { get; set; }
+    public int visited { get; set; }
+}
+
+public class Nodes23(string nodeName, List<string> connectedNodes, bool isFlipFlop, bool isConjunction)
+{
+    public string NodeName { get; set; } = nodeName;
+    public List<string> connectedNodes { get; set; } = connectedNodes;
+    public List<Nodes23> InputNodes { get; set; } = new List<Nodes23>();
+    public bool isFlipFlop { get; set; } = isFlipFlop;
+    public bool isConjunction { get; set; } = isConjunction;
+    public bool OnOff { get; set; }
+    public bool HighLow { get; set; } = false;
 }

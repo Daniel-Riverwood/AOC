@@ -2,29 +2,87 @@
 
 public class Day25 : BaseDay
 {
-    private readonly string _input;
-    private readonly Dictionary<string, string> numbers = new Dictionary<string, string>() 
-    { { "zero", "ze0o" }, { "one", "o1e" }, { "two", "t2o" }, { "three", "th3ee" }, { "four", "fo4r" }, { "five", "fi5e" }, { "six", "s6x" }, { "seven", "se7en" }, { "eight", "ei8ht" }, { "nine", "ni9e" } };
-    
+    private readonly List<string> _input;
+    private List<(string, string)> edges = new List<(string, string)>();
+    private List<string> vertices = new List<string>();
     public Day25()
     {
-        _input = File.ReadAllText(InputFilePath);
+        _input = File.ReadAllText(InputFilePath).SplitByDoubleNewline();
     }
 
-    private string ProcessInput1 (string line)
+    private void CreateTools(List<string> tools)
     {
-        var convertedList = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{convertedList.First()}{convertedList.Last()}";
+        vertices = new List<string>();
+        edges = new List<(string, string)>();
+        //var BaseToolList = new List<Tool>();
+        foreach (var tool in tools)
+        {
+            var main = tool.Split(':');
+            var pos = main[0].Trim();
+            var nodes = main[1].Trim().Split(' ').ToList();
+
+            HashSet<string> con = new HashSet<string>(nodes);
+
+            if (!vertices.Contains(pos)) vertices.Add(pos);
+
+            foreach (var connected in con)
+            {
+                if (!vertices.Contains(connected)) vertices.Add(connected);
+                if (!edges.Contains((pos, connected)) && !edges.Contains((connected, pos))) edges.Add((pos, connected));
+            }
+        }
     }
 
-    private string ProcessInput2 (string line)
+    private int Count(List<List<string>> sets)
     {
-        foreach (var number in numbers) line = line.Replace(number.Key, number.Value);
-        var converted = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{converted.First()}{converted.Last()}";
+        int res = 0;
+        for (var x = 0; x < edges.Count; x++)
+        {
+            var s1 = sets.Where(q => q.Contains(edges[x].Item1)).First();
+            var s2 = sets.Where(q => q.Contains(edges[x].Item2)).First();
+            if (s1 != s2) res++;
+        }
+        return res;
     }
 
-    public override ValueTask<string> Solve_1() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput1(x)).Sum(q => int.Parse(q))}, part 1");
+    private long Actions(string area)
+    {
+        CreateTools(area.SplitByNewline().ToList());
+        List<List<string>> subsets = new List<List<string>>();
 
-    public override ValueTask<string> Solve_2() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput2(x)).Sum(q => int.Parse(q))}, part 2");
+        do
+        {
+            subsets = new List<List<string>>();
+
+            foreach (var vertex in vertices)
+            {
+                subsets.Add(new List<string>() { vertex });
+            }
+
+            int i = 0;
+            List<string> s1, s2;
+
+            while (subsets.Count > 2)
+            {
+                i = new Random().Next() % edges.Count;
+
+                s1 = subsets.Where(s => s.Contains(edges[i].Item1)).First();
+                s2 = subsets.Where(s => s.Contains(edges[i].Item2)).First();
+
+                if (s1 == s2) continue;
+
+                subsets.Remove(s2);
+                s1.AddRange(s2);
+            }
+
+        } while (Count(subsets) != 3);
+
+        return subsets.Aggregate(1, (p, s) => p * s.Count);
+    }
+
+    private long ProcessInput1() => Actions(_input.First());
+
+    public override ValueTask<string> Solve_1() => new($"{ProcessInput1()}");
+
+    public override ValueTask<string> Solve_2() => new($"N/A");
 }

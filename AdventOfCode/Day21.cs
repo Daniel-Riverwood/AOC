@@ -1,30 +1,87 @@
-﻿namespace AdventOfCode;
+﻿using static AdventOfCode.Utilities;
+
+namespace AdventOfCode;
 
 public class Day21 : BaseDay
 {
-    private readonly string _input;
-    private readonly Dictionary<string, string> numbers = new Dictionary<string, string>() 
-    { { "zero", "ze0o" }, { "one", "o1e" }, { "two", "t2o" }, { "three", "th3ee" }, { "four", "fo4r" }, { "five", "fi5e" }, { "six", "s6x" }, { "seven", "se7en" }, { "eight", "ei8ht" }, { "nine", "ni9e" } };
-    
+    private readonly List<string> _input;
+
     public Day21()
     {
-        _input = File.ReadAllText(InputFilePath);
+        _input = File.ReadAllText(InputFilePath).SplitByDoubleNewline();
     }
 
-    private string ProcessInput1 (string line)
+    private long MassSteps(string area, long steps)
     {
-        var convertedList = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{convertedList.First()}{convertedList.Last()}";
+        var map = area.SplitByNewline().ToList();
+        var gridSize = map.Count;
+
+        var firstPlot = Enumerable.Range(0, gridSize)
+            .SelectMany(i => Enumerable.Range(0, gridSize)
+                .Where(j => map[i][j] == 'S')
+                .Select(j => new Coordinate2D(i, j)))
+            .Single();
+
+        var grids = steps / gridSize;
+        var rem = steps % gridSize;
+        var seq = new List<int>();
+        var step = 0;
+        var plots = new HashSet<Coordinate2D> { firstPlot };
+        var dirs = new[] { CompassDirection.N, CompassDirection.S, CompassDirection.E, CompassDirection.W };
+        for (var x = 0; x < 3; x++)
+        {
+            var target = x * gridSize + rem;
+            while (step < target)
+            {
+                step++;
+                plots = new HashSet<Coordinate2D>(plots
+                    .SelectMany(it => dirs
+                        .Select(dir => it.MoveDirection(dir)))
+                            .Where(dest => map[((dest.x % 131) + 131) % 131][((dest.y % 131) + 131) % 131] != '#'));
+            }
+            seq.Add(plots.Count);
+        }
+
+        var c = seq[0];
+        var apb = seq[1] - c;
+        var faptb = seq[2] - c;
+        var ta = faptb - (2 * apb);
+        var a = ta / 2;
+        var b = apb - a;
+
+        return a * (grids * grids) + b * (grids) + c;
     }
 
-    private string ProcessInput2 (string line)
+    public int Actions(string area, long actionCount)
     {
-        foreach (var number in numbers) line = line.Replace(number.Key, number.Value);
-        var converted = line.ToCharArray().Where(x => char.IsDigit(x)).Select(y => y - '0').ToList();
-        return $"{converted.First()}{converted.Last()}";
+        var map = area.SplitByNewline().ToList();
+        var gridSize = map.Count;
+
+        var firstPlot = Enumerable.Range(0, gridSize)
+            .SelectMany(i => Enumerable.Range(0, gridSize)
+                .Where(j => map[i][j] == 'S')
+                .Select(j => new Coordinate2D(i, j)))
+            .Single();
+
+        var seq = new List<int>();
+        var step = 0;
+        var plots = new HashSet<Coordinate2D> { firstPlot };
+        for (var x = 0; x < actionCount; x++)
+        {
+            plots = new HashSet<Coordinate2D>(plots.SelectMany(q => new[] { CompassDirection.N, CompassDirection.S, CompassDirection.E, CompassDirection.W }
+                        .Select(dir => q.MoveDirection(dir)))
+                        .Where(q => map[((q.x % 131) + 131) % 131][((q.y % 131) + 131) % 131] != '#'));
+            seq.Add(plots.Count);
+        }
+
+        return plots.Count;
     }
 
-    public override ValueTask<string> Solve_1() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput1(x)).Sum(q => int.Parse(q))}, part 1");
+    private long ProcessInput1() => Actions(_input.First(), 64);
 
-    public override ValueTask<string> Solve_2() => new($"Solution to {ClassPrefix} {_input.Split("\n").Select(x => ProcessInput2(x)).Sum(q => int.Parse(q))}, part 2");
+    private long ProcessInput2() => MassSteps(_input.First(), 26501365);
+
+    public override ValueTask<string> Solve_1() => new($"{ProcessInput1()}");
+
+    public override ValueTask<string> Solve_2() => new($"{ProcessInput2()}");
 }
