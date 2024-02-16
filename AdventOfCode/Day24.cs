@@ -81,12 +81,15 @@ public class Day24 : BaseDay
             solver.Add(ctx.MkEq(ctx.MkBVAdd(y, ctx.MkBVMul(vy, t)), ctx.MkBVAdd(ctx.MkBV(Convert.ToInt64(stone.Y), 64), ctx.MkBVMul(ctx.MkBV(Convert.ToInt64(stone.Vy), 64), t))));
             solver.Add(ctx.MkEq(ctx.MkBVAdd(z, ctx.MkBVMul(vz, t)), ctx.MkBVAdd(ctx.MkBV(Convert.ToInt64(stone.Z), 64), ctx.MkBVMul(ctx.MkBV(Convert.ToInt64(stone.Vz), 64), t))));
         }
-        Debug.Assert(solver.Check() == Status.SATISFIABLE);
-        Model m = solver.Model;
-        x = (BitVecExpr)m.Eval(x);
-        y = (BitVecExpr)m.Eval(y);
-        z = (BitVecExpr)m.Eval(z);
-        return ((BitVecNum)x).Int64 + ((BitVecNum)y).Int64 + ((BitVecNum)z).Int64;
+        if(solver.Check() == Status.SATISFIABLE)
+        {
+            Model m = solver.Model;
+            x = (BitVecExpr)m.Eval(x);
+            y = (BitVecExpr)m.Eval(y);
+            z = (BitVecExpr)m.Eval(z);
+            return ((BitVecNum)x).Int64 + ((BitVecNum)y).Int64 + ((BitVecNum)z).Int64;
+        }
+        return 0;
     }
 
     private long ProcessInput1() => Actions(_input.First(), 200000000000000, 400000000000000);
