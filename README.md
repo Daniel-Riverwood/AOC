@@ -30,8 +30,6 @@ Invoking **different methods**:
 - `Solver.Solve(new [] { typeof(Day_XX), typeof(Day_YY) });` → same as above.
 
 ## Notes
-
-- This project is currently setup with the solutions in place as is from each day of the Advent Of Code 2023.
 - Minimal modifications were made from the original solutions that were applied for each day, to fit into the template (The Original Folder contains the original approaches, each of which were setup as a separate solution).
 - Not all the solutions are optimal, but are kept in place as is to show what patterns were being applied on each day.
 - A note on the leaderboard below, some times are subject to estimates, as not full focus was on the AoC during that time (each day's problem came out at 7am for the developer)
