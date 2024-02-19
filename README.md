@@ -1,8 +1,8 @@
-# AdventOfCode.Template
+# AdventOfCode 2023
 
 ![CI](https://github.com/eduherminio/AdventOfCode.Template/workflows/CI/badge.svg)
 
-Advent of Code template based on [AoCHelper](https://github.com/eduherminio/AoCHelper) project.
+Advent of Code project based on [AoCHelper](https://github.com/eduherminio/AoCHelper) template.
 
 It allows you to focus on solving AoC puzzles while providing you with some performance stats.
 
