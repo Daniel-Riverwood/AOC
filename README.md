@@ -32,7 +32,7 @@ Invoking **different methods**:
 ## Notes
 - Minimal modifications were made from the original solutions that were applied for each day, to fit into the template (The Original Folder contains the original approaches, each of which were setup as a separate solution).
 - Not all the solutions are optimal, but are kept in place as is to show what patterns were being applied on each day.
-- A note on the leaderboard below, some times are subject to estimates, as not full focus was on the AoC during that time (each day's problem came out at 7am for the developer)
+- A note on the leaderboard below, some times are subject to estimates, as not full focus was on the AoC during that time (each day's problem came out at 7am, with normal workday and meetings)
 - Please note that the input's for each day are not included, to get the inputs, please head over to [Advent Of Code](https://adventofcode.com) for year 2023
 
 Final Leaderboard standings:
